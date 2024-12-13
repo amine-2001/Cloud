@@ -1,26 +1,32 @@
-# Use Node.js base image
+# Stage 1: Build the application
 FROM node:18-alpine as build
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Install Vite locally and set permissions for the node_modules binaries
-RUN npm install vite && chmod +x ./node_modules/.bin/*
-
-# Copy the rest of the application
+# Copy the application source code
 COPY . .
 
-# Build the application
-RUN ./node_modules/.bin/vite build
+# Ensure proper permissions for binaries
+RUN chmod +x ./node_modules/.bin/*
 
-# Use NGINX for serving the built app
+# Build the application
+RUN npm run build
+
+# Stage 2: Serve the application using NGINX
 FROM nginx:alpine
 
-# Copy the build output to the nginx folder
+# Copy the build output from the previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose the default NGINX port
+EXPOSE 80
+
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]
