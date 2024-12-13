@@ -1,6 +1,8 @@
 def EC2_PUBLIC_IP = ""
 def RDS_ENDPOINT = ""
 def DEPLOYER_KEY_URI = ""
+def IMAGE_REPO_FRONTEND = "205930615645.dkr.ecr.us-east-1.amazonaws.com/enis-app/frontend-app-1.0"
+def IMAGE_REPO_BACKEND = "205930615645.dkr.ecr.us-east-1.amazonaws.com/enis-app/backend-app-1.0"
 
 pipeline {
     agent any
@@ -18,23 +20,18 @@ pipeline {
                 script {
                     dir('my-terraform-project/remote_backend') {
                         sh "terraform init"
-                        // Apply Terraform configuration
                         sh "terraform apply --auto-approve"
                     }
                     dir('my-terraform-project') {
-                        // Initialize Terraform
                         sh "terraform init"
                         sh "terraform plan -lock=false"
-                        // Apply Terraform configuration
                         sh "terraform apply -lock=false --auto-approve"
 
-                        // Get EC2 Public IP
                         EC2_PUBLIC_IP = sh(
                             script: '''terraform output instance_details | grep "instance_public_ip" | awk '{print $3}' | tr -d '"' ''',
                             returnStdout: true
                         ).trim()
 
-                        // Get RDS Endpoint
                         RDS_ENDPOINT = sh(
                             script: '''
                                 terraform output rds_endpoint | grep "endpoint" | awk -F'=' '{print $2}' | tr -d '[:space:]"' | sed 's/:3306//'
@@ -42,13 +39,11 @@ pipeline {
                             returnStdout: true
                         ).trim()
 
-                        // Get Deployer Key URI
                         DEPLOYER_KEY_URI = sh(
                             script: '''terraform output deployer_key_s3_uri | tr -d '"' ''',
                             returnStdout: true
                         ).trim()
 
-                        // Debugging: Print captured values
                         echo "EC2 Public IP: ${EC2_PUBLIC_IP}"
                         echo "RDS Endpoint: ${RDS_ENDPOINT}"
                         echo "Deployer Key URI: ${DEPLOYER_KEY_URI}"
@@ -75,7 +70,6 @@ pipeline {
             steps {
                 script {
                     dir('enis-app-tp/backend/backend') {
-                        // Verify the existence of settings.py
                         sh '''
                             if [ -f "settings.py" ]; then
                                 echo "Found settings.py at $(pwd)"
@@ -84,11 +78,9 @@ pipeline {
                                 exit 1
                             fi
                         '''
-                        // Update the HOST in the DATABASES section
                         sh """
                             sed -i "/'HOST':/c\\            'HOST': '${RDS_ENDPOINT}'," settings.py
                         """
-                        // Verify the DATABASES section after the update
                         sh '''
                             echo "DATABASES section of settings.py after update:"
                             sed -n '/DATABASES = {/,/^}/p' settings.py
@@ -109,23 +101,19 @@ pipeline {
         }
         stage('Build Frontend Docker Image') {
             steps {
-                dir('enis-app-tp/frontend') {
-                    script {
-                        echo 'Building Frontend Docker Image...'
-                        def frontendImage = docker.build('frontend-app')
-                        echo "Built Image: ${frontendImage.id}"
-                    }
+                script {
+                    echo 'Building Frontend Docker Image...'
+                    def frontendImage = docker.build('frontend-app', 'enis-app-tp/frontend')
+                    echo "Built Image: ${frontendImage.id}"
                 }
             }
         }
         stage('Build Backend Docker Image') {
             steps {
-                dir('enis-app-tp/backend') {
-                    script {
-                        echo 'Building Backend Docker Image...'
-                        def backendImage = docker.build('backend-app')
-                        echo "Built Image: ${backendImage.id}"
-                    }
+                script {
+                    echo 'Building Backend Docker Image...'
+                    def backendImage = docker.build('backend-app', 'enis-app-tp/backend')
+                    echo "Built Image: ${backendImage.id}"
                 }
             }
         }
@@ -157,4 +145,4 @@ pipeline {
             }
         }
     }
-} 
+}
