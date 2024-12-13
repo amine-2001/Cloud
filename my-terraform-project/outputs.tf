@@ -12,8 +12,7 @@ subnet_id = aws_instance.public_instance.subnet_id
 output "deployer_key_s3_uri" {
 description = "S3 URI of the deployer key file"
 value =
-"s3://${aws_s3_object.private_key_object.bucket}/${aws_s3_object.private_key_object
-.key}"
+"s3://${aws_s3_object.private_key_object.bucket}/${aws_s3_object.private_key_object.key}"
 }
 output "rds_endpoint" {
 description = "The endpoint of the RDS database"
