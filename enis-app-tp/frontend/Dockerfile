@@ -1,20 +1,26 @@
-# Stage 1: Build the frontend app
-FROM node:18-alpine AS build
+# Use Node.js base image
+FROM node:18-alpine as build
 
+# Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Copy package files
 COPY package*.json ./
-RUN npm install
-RUN npm install vite
 
-# Build the frontend
+# Install dependencies
+RUN npm install
+
+# Install Vite locally and set permissions for the node_modules binaries
+RUN npm install vite && chmod +x ./node_modules/.bin/*
+
+# Copy the rest of the application
 COPY . .
 
-RUN npm run build
+# Build the application
+RUN ./node_modules/.bin/vite build
 
-# Stage 2: Set up nginx to serve the built app
+# Use NGINX for serving the built app
 FROM nginx:alpine
 
-# Copy the build artifacts from the build stage to nginx
+# Copy the build output to the nginx folder
 COPY --from=build /app/dist /usr/share/nginx/html
