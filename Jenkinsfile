@@ -89,7 +89,7 @@ pipeline {
                 }
             }
         }
-            stage('Create Database in RDS') {
+        stage('Create Database in RDS') {
             steps {
                 script {
                     sh """
@@ -99,32 +99,28 @@ pipeline {
                 }
             }
         }
-
-
-
-
         stage('Build Frontend Docker Image') {
-                    steps {
-                        dir('enis-app-tp/frontend') {
-                            script {
-                                echo 'Building Frontend Docker Image...'
-                                def frontendImage = docker.build('frontend-app')
-                                echo "Built Image: ${frontendImage.id}"
-                            }
-                        }
+            steps {
+                dir('enis-app-tp/frontend') {
+                    script {
+                        echo 'Building Frontend Docker Image...'
+                        def frontendImage = docker.build('frontend-app')
+                        echo "Built Image: ${frontendImage.id}"
                     }
                 }
+            }
+        }
         stage('Build Backend Docker Image') {
-                    steps {
-                        dir('enis-app-tp/backend') {
-                            script {
-                                echo 'Building Backend Docker Image...'
-                                def backendImage = docker.build('backend-app')
-                                echo "Built Image: ${backendImage.id}"
-                            }
-                        }
+            steps {
+                dir('enis-app-tp/backend') {
+                    script {
+                        echo 'Building Backend Docker Image...'
+                        def backendImage = docker.build('backend-app')
+                        echo "Built Image: ${backendImage.id}"
                     }
                 }
+            }
+        }
         stage('Login to AWS ECR') {
             steps {
                 script {
@@ -134,15 +130,15 @@ pipeline {
                 }
             }
         }
-         stage('Tag and Push Frontend Image') {
-                    steps {
-                        script {
-                            echo 'Tagging and pushing Frontend Image...'
-                            sh "docker tag frontend-app:latest $IMAGE_REPO_FRONTEND"
-                            sh "docker push $IMAGE_REPO_FRONTEND"
-                        }
-                    }
+        stage('Tag and Push Frontend Image') {
+            steps {
+                script {
+                    echo 'Tagging and pushing Frontend Image...'
+                    sh "docker tag frontend-app:latest $IMAGE_REPO_FRONTEND"
+                    sh "docker push $IMAGE_REPO_FRONTEND"
                 }
+            }
+        }
         stage('Tag and Push Backend Image') {
             steps {
                 script {
@@ -152,4 +148,5 @@ pipeline {
                 }
             }
         }
+    }
 }
