@@ -6,9 +6,11 @@ WORKDIR /app
 # Install dependencies
 COPY package*.json ./
 RUN npm install
+RUN npm install vite
 
 # Build the frontend
 COPY . .
+
 RUN npm run build
 
 # Stage 2: Set up nginx to serve the built app
