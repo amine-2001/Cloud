@@ -89,7 +89,7 @@ pipeline {
                 }
             }
         }
-           stage('Create Database in RDS') {
+            stage('Create Database in RDS') {
             steps {
                 script {
                     sh """
