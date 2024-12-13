@@ -1,20 +1,10 @@
-FROM node:18-alpine
-
+FROM node:18-alpine as build
 WORKDIR /app
-
-# Install dependencies
 COPY package*.json ./
 RUN npm install
-
-# Check vite version (if necessary)
-RUN npx vite --version
-
-# Copy source code
 COPY . .
-
-# Build the frontend
 RUN npm run build
-
-# Set up nginx for production
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
