@@ -103,7 +103,7 @@ DATABASES = {
         'NAME': 'enis_tp',
         'USER': 'dbuser',
         'PASSWORD': 'DBpassword2024',
-        'HOST': 'DB_HOST',
+        'HOST': DB_HOST,
         'PORT': 3306,
     }
 }
