@@ -1,8 +1,6 @@
 def EC2_PUBLIC_IP = ""
 def RDS_ENDPOINT = ""
 def DEPLOYER_KEY_URI = ""
-def IMAGE_REPO_FRONTEND = "205930615645.dkr.ecr.us-east-1.amazonaws.com/enis-app/frontend-app-1.0"
-def IMAGE_REPO_BACKEND = "205930615645.dkr.ecr.us-east-1.amazonaws.com/enis-app/backend-app-1.0"
 
 pipeline {
     agent any
@@ -12,6 +10,8 @@ pipeline {
         ECR_REPO_URL = '205930615645.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_NAME = 'enis-app'
         IMAGE_REPO = "${ECR_REPO_URL}/${ECR_REPO_NAME}"
+        IMAGE_REPO_FRONTEND = "${IMAGE_REPO}:frontend-app-1.0"
+        IMAGE_REPO_BACKEND = "${IMAGE_REPO}:backend-app-1.0"
         AWS_REGION = "us-east-1"
     }
     stages {
