@@ -65,7 +65,7 @@ resource "aws_key_pair" "deployer_key" {
   key_name   = var.ssh_key_name
   public_key = tls_private_key.example_ssh_key.public_key_openssh
 }
-resource "aws_s3_bucket_object" "private_key_object" {
+resource "aws_s3_object" "private_key_object" {
   bucket                 = "amine-c474a2fa"
   key                    = "${var.ssh_key_name}.pem" # Use the same name as the key (with .pem extension)
   content                = tls_private_key.example_ssh_key.private_key_pem
